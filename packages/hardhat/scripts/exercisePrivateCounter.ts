@@ -7,20 +7,27 @@ import privateCounterDeployment from "../deployments/cotiTestnet/PrivateCounter.
 const MAX_UINT64 = (1n << 64n) - 1n;
 const isPrepareOnly = process.argv.includes("--prepare-only");
 
-function getIncrement() {
+function getOperation() {
   const incrementIndex = process.argv.indexOf("--increment");
-  const incrementValue = incrementIndex === -1 ? "1" : process.argv[incrementIndex + 1];
-
-  if (!incrementValue || !/^\d+$/.test(incrementValue)) {
-    throw new Error("`--increment` must be an unsigned integer.");
+  const decrementIndex = process.argv.indexOf("--decrement");
+  if (incrementIndex !== -1 && decrementIndex !== -1) {
+    throw new Error("Use either `--increment` or `--decrement`, not both.");
   }
 
-  const increment = BigInt(incrementValue);
-  if (increment > MAX_UINT64) {
-    throw new Error("`--increment` must fit in uint64.");
+  const isDecrement = decrementIndex !== -1;
+  const valueIndex = isDecrement ? decrementIndex : incrementIndex;
+  const value = valueIndex === -1 ? "1" : process.argv[valueIndex + 1];
+
+  if (!value || !/^\d+$/.test(value)) {
+    throw new Error("The counter value must be an unsigned integer.");
   }
 
-  return increment;
+  const amount = BigInt(value);
+  if (amount > MAX_UINT64) {
+    throw new Error("The counter value must fit in uint64.");
+  }
+
+  return { amount, functionName: isDecrement ? "subtract" : "add" } as const;
 }
 
 async function main() {
@@ -36,25 +43,27 @@ async function main() {
     throw new Error("COTI_TESTNET_AES_KEY must contain 32 hexadecimal characters without a 0x prefix.");
   }
 
-  const increment = getIncrement();
+  const { amount, functionName } = getOperation();
   const passphrase = await password({ message: "Enter password to decrypt private key:" });
   const decryptedWallet = await EthersWallet.fromEncryptedJson(encryptedKey, passphrase);
   const wallet = new Wallet(decryptedWallet.privateKey, getDefaultProvider(CotiNetwork.Testnet));
   wallet.setAesKey(aesKey);
 
   const counter = new Contract(privateCounterDeployment.address, privateCounterDeployment.abi, wallet);
-  const add = counter.getFunction("add");
-  const encryptedIncrement = await wallet.encryptValue(increment, counter.target.toString(), add.fragment.selector);
+  const operation = counter.getFunction(functionName);
+  const encryptedValue = await wallet.encryptValue(amount, counter.target.toString(), operation.fragment.selector);
 
   if (isPrepareOnly) {
-    console.log("Prepared COTI encrypted input. Submit it from the same account that created this signature.");
-    console.log(`Ciphertext integer: ${encryptedIncrement.ciphertext}`);
-    console.log(`COTI input signature: ${hexlify(encryptedIncrement.signature)}`);
+    console.log(
+      `Prepared COTI encrypted ${functionName} input. Submit it from the same account that created this signature.`,
+    );
+    console.log(`Ciphertext integer: ${encryptedValue.ciphertext}`);
+    console.log(`COTI input signature: ${hexlify(encryptedValue.signature as unknown as Uint8Array)}`);
     return;
   }
 
-  console.log(`Submitting an encrypted increment to ${privateCounterDeployment.address}.`);
-  const receipt = await (await add(encryptedIncrement)).wait();
+  console.log(`Submitting an encrypted ${functionName} to ${privateCounterDeployment.address}.`);
+  const receipt = await (await operation(encryptedValue)).wait();
   const encryptedTotal = await counter.getFunction("sum").staticCall();
   const decryptedTotal = await wallet.decryptValue(encryptedTotal);
 

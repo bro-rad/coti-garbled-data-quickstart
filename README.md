@@ -1,16 +1,67 @@
-# 🏗 Scaffold-ETH 2
+# COTI Garbled Data Quickstart
 
-<h4 align="center">
-  <a href="https://docs.scaffoldeth.io">Documentation</a> |
-  <a href="https://scaffoldeth.io">Website</a>
-</h4>
-
-🧪 An open-source, up-to-date toolkit for building decentralized applications (dapps) on the Ethereum blockchain. It's designed to make it easier for developers to create and deploy smart contracts and build user interfaces that interact with those contracts.
+This standalone Scaffold-ETH 2 project demonstrates a wallet-owned COTI encrypted counter on COTI Testnet. Each connected account has a separate encrypted total; the contract never exposes the plaintext increment or total.
 
 > [!NOTE]
 > 🤖 Scaffold-ETH 2 is AI-ready! It has everything agents need to build on Ethereum. Check `.agents/`, `.claude/`, `.opencode` or `.cursor/` for more info.
 
-⚙️ Built using NextJS, RainbowKit, Hardhat, Wagmi, Viem, and Typescript.
+Built with Next.js, RainbowKit, Wagmi, Viem, TypeScript, Hardhat, and COTI's confidential arithmetic libraries.
+
+## Current Status
+
+The contract compiles under the COTI profile and the direct Testnet exercise supports encrypted increments and decrements. Punk Wallet exposes the COTI private RPC methods needed by the browser over its existing WalletConnect session. The quickstart browser page still needs to be switched from the Debug Contracts fallback to those methods.
+
+The deployed COTI Testnet metadata is stale after the account-scoped `PrivateCounter` change. Redeploy and regenerate the frontend ABI before using the changed contract on Testnet.
+
+## COTI Testnet
+
+| Item | Value |
+| --- | --- |
+| Chain ID | `7082400` |
+| RPC | `https://testnet.coti.io/rpc` |
+| Explorer | `https://testnet.cotiscan.io` |
+| Native token | `COTI` |
+
+Fund the deployer and test wallet from the official COTI Testnet faucet. This project is testnet-only and is not an anonymity or production-availability guarantee.
+
+## Run
+
+```bash
+yarn install
+yarn compile
+yarn hardhat:test
+yarn start
+```
+
+For the COTI compiler profile:
+
+```bash
+cd packages/hardhat
+npx hardhat compile --build-profile coti
+```
+
+Run the direct encrypted exercise only with an explicitly configured local test account and AES setup:
+
+```bash
+yarn coti:aes --network cotiTestnet
+yarn coti:counter --increment 3
+yarn coti:counter --decrement 1
+```
+
+The script is an escape route for debugging and automation. It is not a replacement for wallet-owned browser custody.
+
+## Wallet Boundary
+
+Run Punk Wallet separately on port `3001` and the quickstart on port `3000`:
+
+```bash
+cd /Users/tekh/rn/punk-wallet
+PORT=3001 yarn start
+```
+
+Connect the quickstart to Punk Wallet using the existing WalletConnect flow. The wallet owns onboarding, AES recovery, lock/unlock, rotation, encryption, and decryption. The quickstart may call `coti_getStatus`, `coti_unlock`, `coti_lock`, `coti_encryptValue`, `coti_decryptValue`, and `coti_rotateAes`, but it must never receive or persist plaintext AES material.
+
+Private values remain visible only while the wallet session is unlocked. Sender address, target contract, method selector, transaction existence, timing, gas payer, and general RPC interaction metadata remain observable.
 
 - ✅ **Contract Hot Reload**: Your frontend auto-adapts to your smart contract as you edit it.
 - 🪝 **[Custom hooks](https://docs.scaffoldeth.io/hooks/)**: Collection of React hooks wrapper around [wagmi](https://wagmi.sh/) to simplify interactions with smart contracts with typescript autocompletion.

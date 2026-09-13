@@ -236,22 +236,27 @@ Completed:
 - Added a COTI-specific Debug Contracts fallback because the installed `@scaffold-ui/debug-contracts` package cannot resolve custom chains absent from `viem/chains`.
 - Validated Hardhat compilation, COTI-profile compilation, frontend lint, and frontend typecheck successfully.
 
-Current state:
+Current state as of 2026-09-13:
 
-- The COTI contract, Hardhat/Testnet configuration, generated ABI/address metadata, and raw encrypted-input Debug Contracts fallback are implemented.
-- Punk Wallet AES-custody integration is not implemented yet. No wallet-owned unlock/encrypt/decrypt RPC surface or user-facing decrypted-total flow exists yet.
-- The planned explanatory `/private-counter` page has not been created yet.
-- The `@coti-io/coti-ethers` Testnet encrypt-submit-retrieve-decrypt script and narrow `PrivateCounter` tests have not been created yet.
-- The generated COTI deployment metadata is in `packages/nextjs/contracts/deployedContracts.ts` for chain `7082400`.
+- `PrivateCounter` is account-scoped: each caller has its own encrypted total, `add` increments it, and checked `subtract` decrements it. Events expose only the caller address.
+- The COTI compiler profile passes with Solidity 0.8.30 after making the zero initializer explicit as `uint64(0)`.
+- The direct COTI Testnet exercise script supports `--increment` and `--decrement`, encrypts with the correct method selector, submits, retrieves `sum()`, and decrypts the result with the script's opt-in AES setup.
+- The quickstart script passes focused ESLint. The package-wide Hardhat typecheck still reports three unrelated Rocketh `capturedTransactions` errors.
+- The existing COTI Testnet deployment and generated frontend metadata are stale for the changed contract. A fresh deployment is required before using `subtract` or relying on the generated ABI.
+- Punk Wallet already owns onboarding, recovery, lock/unlock, AES rotation, and COTI Ethers encryption/decryption. Its current uncommitted WalletConnect bridge routes `coti_getStatus`, `coti_unlock`, `coti_lock`, `coti_encryptValue`, `coti_decryptValue`, and `coti_rotateAes` through the wallet-owned session.
+- The quickstart browser page still needs to call those methods, submit encrypted `add`/`subtract` inputs, and decrypt the caller's `sum()` result. It must never handle AES material or display raw ciphertext as the counter value.
+- No fresh deployment, generated ABI refresh, focused `PrivateCounter` tests, or full browser smoke test has been completed yet.
 - The original repository remains separate from the sibling project; no ScribeCast changes were copied into the new project.
-- Receipt errors, success links, and malformed-input errors are visible in the Debug Contracts fallback; frontend lint and typecheck pass.
 
-Next implementation constraint:
+Next implementation steps:
 
-- Work is paused at the user's request. Do not modify code until resumed.
-- On resume, use official COTI encrypted input/output and AES onboarding guidance while implementing wallet-side custody in Punk Wallet.
-- Preserve the working local Hardhat deploy and frontend startup path while adding wallet-side private session controls and user-facing page updates incrementally.
-- Do not expose, serialize, log, or persist plaintext AES keys; do not treat raw `sum()` ciphertext as the user's counter value.
+1. Preserve the Punk Wallet WalletConnect bridge, then run the fresh-wallet COTI Testnet browser smoke test.
+2. Redeploy `PrivateCounter` to COTI Testnet and regenerate `packages/nextjs/contracts/deployedContracts.ts`.
+3. Add focused contract tests for account isolation, add/subtract, invalid ciphertext, underflow, overflow, and non-sensitive events.
+4. Replace the `/private-counter` Debug Contracts fallback with the wallet-backed browser flow.
+5. Re-run quickstart lint, typecheck, COTI compile, frontend build, and browser validation.
+
+Do not expose, serialize, log, or persist plaintext AES keys; do not treat raw `sum()` ciphertext as the user's counter value.
 
 ## AES Handling Policy Update (2026-09-13)
 
