@@ -151,6 +151,71 @@ const deployedContracts = {
       deployedOnBlock: 1,
     },
   },
+  7082400: {
+    PrivateCounter: {
+      address: "0x02408cc98fe20b7e3fb557e67ecf2ab0daf6da88",
+      abi: [
+        {
+          inputs: [],
+          stateMutability: "nonpayable",
+          type: "constructor",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "account",
+              type: "address",
+            },
+          ],
+          name: "CounterIncremented",
+          type: "event",
+        },
+        {
+          inputs: [
+            {
+              components: [
+                {
+                  internalType: "ctUint64",
+                  name: "ciphertext",
+                  type: "uint256",
+                },
+                {
+                  internalType: "bytes",
+                  name: "signature",
+                  type: "bytes",
+                },
+              ],
+              internalType: "struct itUint64",
+              name: "value",
+              type: "tuple",
+            },
+          ],
+          name: "add",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "sum",
+          outputs: [
+            {
+              internalType: "ctUint64",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+      ],
+      inheritedFunctions: {},
+      deployedOnBlock: 9467121,
+    },
+  },
 } as const;
 
 export default deployedContracts satisfies GenericContractsDeclaration;

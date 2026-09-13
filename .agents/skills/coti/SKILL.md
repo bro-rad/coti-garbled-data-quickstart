@@ -57,6 +57,61 @@ For frontend work:
 - Check the configured `targetNetworks` and environment variables before assuming the app targets COTI.
 - Use COTIScan links for user-facing transaction and address navigation.
 
+## AES ownership and unlock policy
+
+For production-safe COTI integrations, treat AES key handling as a security boundary:
+
+- Keep AES custody wallet-side. The dApp must not receive raw AES material.
+- If not using `@coti-io/coti-wallet-plugin`, implement equivalent wallet-owned unlock and private operation controls.
+- Require wallet-gated private operations (`unlock`/`lock`/`encrypt`/`decrypt`) before contract interaction that needs private values.
+- Bind private session state to wallet account and chain.
+- Keep AES plaintext session-only in wallet runtime memory and clear on wallet lock/disconnect.
+
+Important nuance from official docs:
+
+- In plugin flows, active AES material exists only in session-scoped plugin state and is cleared on lock/disconnect.
+- App code must not add its own plaintext AES persistence, logging, telemetry capture, or custom storage path.
+- A no-plugin architecture is acceptable only if wallet-side custody and unlock semantics are implemented with equivalent rigor.
+
+References:
+
+- https://docs.coti.io/coti-documentation/build-on-coti/tools/coti-wallet-plugin/integration-guide.md
+- https://docs.coti.io/coti-documentation/build-on-coti/tools/coti-wallet-plugin/configuration.md
+- https://docs.coti.io/coti-documentation/build-on-coti/tools/coti-wallet-plugin/aes-key-onboarding.md
+
+## Onboarding, backup, and wallet support constraints
+
+- Supported onboarding routes are wallet-type dependent (Snap route, encrypted backup restore route, then onboarding/manual entry fallback as documented).
+- `isUnlocked` means private balances are visible after refresh; do not infer onboarding or persistent key state from it.
+- Signature-derived encrypted backup is compatibility-limited; some wallet classes are not officially supported for deterministic backup restore.
+- Remote AES backup is deprecated in official guidance. Use documented onboarding services patterns and treat encrypted backup signatures as sensitive actions.
+
+## Production anti-shortcuts
+
+Do not weaken test flows in ways that would fail production review:
+
+- No plaintext AES key in app or wallet localStorage/sessionStorage/indexedDB or analytics payloads.
+- No fake unlock flags or bypasses around wallet-gated private operations.
+- No assumptions that controlling the same address always implies backup recoverability.
+- Keep lock behavior explicit and test it under account switch, chain switch, and disconnect.
+
+## Punk Wallet mode policy
+
+When using Punk Wallet for COTI private flows:
+
+- Treat throwaway EOA safety and AES safety as separate concerns.
+- Support two modes:
+	- `Secure Mode` (default): conservative lock behavior and production baseline.
+	- `Punk Mode` (user-selected): lower friction with relaxed auto-lock behavior.
+- `Punk Mode` may be enabled on Testnet or Mainnet at user discretion.
+- Mode persistence is user-controlled; do not auto-disable mode without user action.
+- `Punk Mode` must still preserve the security floor:
+	- never expose raw AES to dApp,
+	- never persist plaintext AES,
+	- never log plaintext AES,
+	- maintain clear user-visible mode indication.
+- Document exactly where wallet keys and encrypted backups are stored for each mode.
+
 ## Safety and validation
 
 Before shipping COTI changes:
@@ -66,6 +121,8 @@ Before shipping COTI changes:
 3. Compile and run the narrowest relevant tests before deployment.
 4. For live deployments, confirm the network, deployer account, RPC, explorer, and contract addresses independently.
 5. Never expose or commit `DEPLOYER_PRIVATE_KEY_ENCRYPTED`, runtime private keys, API keys, or wallet secrets.
+6. For private-balance UX, verify unlock/lock semantics and typed error handling in the chosen wallet integration path.
+7. Confirm no plaintext AES material appears in app storage, wallet storage, logs, analytics, or debugging output.
 
 ## COTI Notes
 

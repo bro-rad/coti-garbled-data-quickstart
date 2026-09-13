@@ -29,18 +29,27 @@ const deployTasks = [
 export default defineConfig({
   plugins: [hardhatToolbox, HardhatDeploy],
   solidity: {
-    compilers: [
-      {
+    profiles: {
+      default: {
         version: "0.8.30",
         settings: {
           optimizer: {
             enabled: true,
-            // https://docs.soliditylang.org/en/latest/using-the-compiler.html#optimizer-options
             runs: 200,
           },
         },
       },
-    ],
+      coti: {
+        version: "0.8.30",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+          evmVersion: "paris",
+        },
+      },
+    },
   },
   generateTypedArtifacts: {
     destinations: [
@@ -98,6 +107,16 @@ export default defineConfig({
     baseSepolia: {
       type: "http",
       url: "https://sepolia.base.org",
+      accounts: [deployerPrivateKey],
+    },
+    coti: {
+      type: "http",
+      url: "https://mainnet.coti.io/rpc",
+      accounts: [deployerPrivateKey],
+    },
+    cotiTestnet: {
+      type: "http",
+      url: "https://testnet.coti.io/rpc",
       accounts: [deployerPrivateKey],
     },
     arbitrum: {

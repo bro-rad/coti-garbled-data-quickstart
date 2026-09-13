@@ -8,6 +8,10 @@ import { deployScript, artifacts } from "../rocketh/deploy.js";
  */
 export default deployScript(
   async env => {
+    if (env.name === "coti" || env.name === "cotiTestnet") {
+      return;
+    }
+
     /*
       On localhost, the deployer account is the one that comes with Hardhat, which is already funded.
 

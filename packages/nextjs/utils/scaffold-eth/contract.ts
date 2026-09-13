@@ -80,7 +80,7 @@ export type GenericContractsDeclaration = {
 
 export const contracts = contractsData as GenericContractsDeclaration | null;
 
-type ConfiguredChainId = (typeof scaffoldConfig)["targetNetworks"][0]["id"];
+type ConfiguredChainId = (typeof scaffoldConfig)["targetNetworks"][number]["id"];
 
 type IsContractDeclarationMissing<TYes, TNo> = typeof contractsData extends { [key in ConfiguredChainId]: any }
   ? TNo
@@ -89,10 +89,13 @@ type IsContractDeclarationMissing<TYes, TNo> = typeof contractsData extends { [k
 type ContractsDeclaration = IsContractDeclarationMissing<GenericContractsDeclaration, typeof contractsData>;
 
 type Contracts = ContractsDeclaration[ConfiguredChainId];
+type KeysOfUnion<T> = T extends T ? keyof T : never;
+type ContractForName<T, TContractName extends PropertyKey> =
+  T extends Record<TContractName, infer TContract> ? TContract : never;
 
-export type ContractName = keyof Contracts;
+export type ContractName = KeysOfUnion<Contracts>;
 
-export type Contract<TContractName extends ContractName> = Contracts[TContractName];
+export type Contract<TContractName extends ContractName> = ContractForName<Contracts, TContractName>;
 
 type InferContractAbi<TContract> = TContract extends { abi: infer TAbi } ? TAbi : never;
 

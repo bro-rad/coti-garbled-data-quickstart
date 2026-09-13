@@ -1,4 +1,19 @@
+import { defineChain } from "viem";
 import * as chains from "viem/chains";
+
+export const cotiTestnet = defineChain({
+  id: 7082400,
+  name: "COTI Testnet",
+  nativeCurrency: { name: "COTI", symbol: "COTI", decimals: 18 },
+  rpcUrls: {
+    default: { http: ["https://testnet.coti.io/rpc"] },
+    public: { http: ["https://testnet.coti.io/rpc"] },
+  },
+  blockExplorers: {
+    default: { name: "COTIScan Testnet", url: "https://testnet.cotiscan.io" },
+  },
+  testnet: true,
+});
 
 export type BaseConfig = {
   targetNetworks: readonly chains.Chain[];
@@ -15,7 +30,7 @@ export const DEFAULT_ALCHEMY_API_KEY = "IZYEU2cWBgnFmgiTAgpWD";
 
 const scaffoldConfig = {
   // The networks on which your DApp is live
-  targetNetworks: [chains.hardhat],
+  targetNetworks: [chains.hardhat, cotiTestnet],
   // The interval at which your front-end polls the RPC servers for new data (it has no effect if you only target the local network (default is 4000))
   pollingInterval: 3000,
   // This is ours Alchemy's default API key.

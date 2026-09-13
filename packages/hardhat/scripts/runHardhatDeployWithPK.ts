@@ -33,8 +33,11 @@ async function main() {
     }
   }
 
-  // Run hardhat deploy (compilation already handled by the npm script)
-  const deployArgs = ["deploy", "--no-compile", "--skip-prompts", ...process.argv.slice(2)];
+  const deployArgs = ["deploy", "--skip-prompts"];
+  if (networkName === "coti" || networkName === "cotiTestnet") {
+    deployArgs.push("--build-profile", "coti");
+  }
+  deployArgs.push(...process.argv.slice(2));
 
   const hardhat = spawn("hardhat", deployArgs, {
     stdio: "inherit",
