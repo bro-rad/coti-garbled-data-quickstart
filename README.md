@@ -59,6 +59,21 @@ cd ../punk-wallet
 PORT=3001 yarn start
 ```
 
+For PowerShell, set the port in the current shell before starting the wallet:
+
+```powershell
+Set-Location ..\punk-wallet
+$env:PORT = "3001"
+yarn start
+```
+
+For Windows Command Prompt:
+
+```cmd
+cd ..\punk-wallet
+set "PORT=3001" && yarn start
+```
+
 Connect the quickstart to Punk Wallet using the existing WalletConnect flow. The wallet owns onboarding, AES recovery, lock/unlock, rotation, encryption, and decryption. The quickstart may call `coti_getStatus`, `coti_unlock`, `coti_lock`, `coti_encryptValue`, `coti_decryptValue`, and `coti_rotateAes`, but it must never receive or persist plaintext AES material.
 
 Private values remain visible only while the wallet session is unlocked. Sender address, target contract, method selector, transaction existence, timing, gas payer, and general RPC interaction metadata remain observable.
