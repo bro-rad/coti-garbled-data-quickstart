@@ -2,7 +2,7 @@
 
 ## Objective
 
- Create a new standalone Scaffold-ETH project at `/Users/tekh/rn/coti-garbled-data-quickstart` using `npx create-eth@latest`. Preserve the untouched generator output as its own baseline commit, then create a local-only `coti-garbled-data-quickstart` branch.
+ Create a new standalone Scaffold-ETH project named `coti-garbled-data-quickstart` using `npx create-eth@latest`. Preserve the untouched generator output as its own baseline commit, then create a local-only `coti-garbled-data-quickstart` branch.
 
 The new project must not depend on `feature/scribecast-coti-hardhat3`, ScribeCast, or the current repository's working tree. It is a concise but complete COTI Testnet example for encrypted inputs, temporary Garbledtext computations, and user-decryptable outputs.
 
@@ -220,7 +220,7 @@ The standalone README must include:
 
 Completed:
 
-- Created the standalone sibling project at `/Users/tekh/rn/coti-garbled-data-quickstart` with `npx create-eth@latest coti-garbled-data-quickstart --solidity-framework hardhat`.
+- Created the standalone sibling project with `npx create-eth@latest coti-garbled-data-quickstart --solidity-framework hardhat`.
 - Installed the generated dependencies with Yarn 4.13.0.
 - Ran the generated baseline checks successfully: `yarn lint`, `yarn compile`, and `yarn next:build`.
 - Created the local-only `coti-garbled-data-quickstart` branch.

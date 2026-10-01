@@ -40,7 +40,7 @@ cd packages/hardhat
 npx hardhat compile --build-profile coti
 ```
 
-Run the direct encrypted exercise only with an explicitly configured local test account and AES setup:
+Run the direct encrypted exercise only with an explicitly configured test account and AES setup:
 
 ```bash
 yarn coti:aes --network cotiTestnet
@@ -55,7 +55,7 @@ The script is an escape route for debugging and automation. It is not a replacem
 Run Punk Wallet separately on port `3001` and the quickstart on port `3000`:
 
 ```bash
-cd /Users/tekh/rn/punk-wallet
+cd ../punk-wallet
 PORT=3001 yarn start
 ```
 
